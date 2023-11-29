@@ -9,9 +9,9 @@ import ssl
 import smtplib
 
 # Email configuration
-email_sender = "nnavigill784@gmail.com"
-email_pass = "acqk xqae vksj glqs"
-email_receiver = 'e22cseu1384@bennett.edu.in'
+email_sender = "--"   # Enter Your Gmail For Sending Messages to user 
+email_pass = "---- ---- ---- ----" # Enter Your App Password Here
+email_receiver = '---' #Enter The Email Where You Want to Send The messages 
 subject = "System Monitoring Alert"
 
 # Danger threshold for each parameter
