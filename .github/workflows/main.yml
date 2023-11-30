@@ -1,4 +1,4 @@
-name: CI/CD Workflow
+name: System Monitoring Workflow
 
 on:
   push:
@@ -23,15 +23,5 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Tests
-      run: |
-        python your_test_script.py
-
-    - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: |
-        git config --global user.email "you@example.com"
-        git config --global user.name "Your Name"
-        git checkout main
-        git pull origin main
-        git push origin main
+    - name: Run System Monitoring App
+      run: python your_system_monitoring_script.py
