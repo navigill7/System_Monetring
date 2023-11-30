@@ -24,4 +24,4 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run System Monitoring App
-      run: python your_system_monitoring_script.py
+      run: python linux.py
