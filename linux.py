@@ -11,7 +11,7 @@ import threading
 
 # Email configuration
 email_sender = "nnavigill784@gmail.com"
-email_pass = "acqk xqae vksj glqs".replace(' ', '')
+email_pass = "acqk xqae vksj glqs"
 email_receiver = 'e22cseu1384@bennett.edu.in'
 subject = "System Monitoring Alert"
 
