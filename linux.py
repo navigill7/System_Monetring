@@ -7,10 +7,11 @@ import psutil
 from email.message import EmailMessage
 import ssl
 import smtplib
+import threading
 
 # Email configuration
 email_sender = "nnavigill784@gmail.com"
-email_pass = "acqk xqae vksj glqs"
+email_pass = "acqk xqae vksj glqs".replace(' ' , '')
 email_receiver = 'e22cseu1384@bennett.edu.in'
 subject = "System Monitoring Alert"
 
@@ -75,6 +76,25 @@ class SystemMonitorApp(tk.Tk):
         high_cpu_processes = self.get_high_cpu_processes()
         # Suggest actions for high CPU usage processes
         process_actions = self.suggest_process_actions(high_cpu_processes)
+
+        # Getting The Running Applications
+        running_apps = self.get_running_apps()
+         # Consolidate information into a single email
+        email_content = (
+    "Alert!!\n\n"
+    "Running Applications:\n\n"
+    "{}\n\n".format('\n'.join(running_apps))
+)
+
+
+
+        for parameter, value in [('CPU', cpu_percentage), ('RAM', ram_percentage), ('Network', network_usage), ('Disk', disk_percentage)]:
+            if not alert_sent[parameter] and value > danger_threshold[parameter]:
+                email_content += f"{parameter} Exceeded: {value}\nSuggested Action: {self.suggest_action(parameter)}\n\n"
+                alert_sent[parameter] = True
+
+        # Send email asynchronously
+        threading.Thread(target=self.send_email_alert, args=(email_content,)).start()
 
         # Append data to lists
         self.time.append(frame)
@@ -144,7 +164,15 @@ class SystemMonitorApp(tk.Tk):
         # Redraw the canvas
         self.canvas.draw()
 
-    
+    def get_running_apps(self):
+        apps = []
+        for process in psutil.process_iter(['pid', 'name']):
+            try:
+                apps.append(f"Running App: {process.info['name']} (PID: {process.info['pid']})")
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return apps
+
     
     # Function to check danger thresholds and send email alert if exceeded
     def check_danger(self, parameter, value):
