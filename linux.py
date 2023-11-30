@@ -11,7 +11,7 @@ import threading
 
 # Email configuration
 email_sender = "nnavigill784@gmail.com"
-email_pass = "acqk xqae vksj glqs".replace(' ' , '')
+email_pass = "acqk xqae vksj glqs".replace(' ', '')
 email_receiver = 'e22cseu1384@bennett.edu.in'
 subject = "System Monitoring Alert"
 
@@ -79,22 +79,24 @@ class SystemMonitorApp(tk.Tk):
 
         # Getting The Running Applications
         running_apps = self.get_running_apps()
-         # Consolidate information into a single email
+        # Write the list of running applications to a text file
+        self.write_running_apps_to_file(running_apps)
+
+        # Consolidate information into a single email
         email_content = (
-    "Alert!!\n\n"
-    "Running Applications:\n\n"
-    "{}\n\n".format('\n'.join(running_apps))
-)
+            "Alert!!\n\n"
+            "Running Applications:\n\n"
+            "{}\n\n".format('\n'.join(running_apps))
+        )
 
-
-
-        for parameter, value in [('CPU', cpu_percentage), ('RAM', ram_percentage), ('Network', network_usage), ('Disk', disk_percentage)]:
+        for parameter, value in [('CPU', cpu_percentage), ('RAM', ram_percentage), ('Network', network_usage),
+                                 ('Disk', disk_percentage)]:
             if not alert_sent[parameter] and value > danger_threshold[parameter]:
                 email_content += f"{parameter} Exceeded: {value}\nSuggested Action: {self.suggest_action(parameter)}\n\n"
                 alert_sent[parameter] = True
 
-        # Send email asynchronously
-        threading.Thread(target=self.send_email_alert, args=(email_content,)).start()
+        # Send email with attached running apps text file asynchronously
+        threading.Thread(target=self.send_email_alert, args=(email_content, 'running_apps.txt')).start()
 
         # Append data to lists
         self.time.append(frame)
@@ -144,7 +146,8 @@ class SystemMonitorApp(tk.Tk):
         self.ax3.legend()
 
         # Display current Network usage
-        self.ax3.text(0.02, 0.92, f'Current Network: {network_usage} bytes/s', transform=self.ax3.transAxes, color='orange')
+        self.ax3.text(0.02, 0.92, f'Current Network: {network_usage} bytes/s', transform=self.ax3.transAxes,
+                      color='orange')
 
         # Plot Disk usage
         self.ax4.clear()
@@ -158,22 +161,25 @@ class SystemMonitorApp(tk.Tk):
         # Display current Disk percentage
         self.ax4.text(0.02, 0.92, f'Current Disk: {disk_percentage:.2f}%', transform=self.ax4.transAxes, color='red')
 
-        # Display process actions
+                # Display process actions
         print("\n".join(process_actions))
 
         # Redraw the canvas
         self.canvas.draw()
 
+    def write_running_apps_to_file(self, running_apps):
+        with open('running_apps.txt', 'w') as file:
+            file.write('\n'.join(running_apps))
+
     def get_running_apps(self):
         apps = []
-        for process in psutil.process_iter(['pid', 'name']):
+        for process in psutil.process_iter(attrs=['pid', 'name']):
             try:
                 apps.append(f"Running App: {process.info['name']} (PID: {process.info['pid']})")
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return apps
 
-    
     # Function to check danger thresholds and send email alert if exceeded
     def check_danger(self, parameter, value):
         if not alert_sent[parameter] and value > danger_threshold[parameter]:
@@ -181,18 +187,22 @@ class SystemMonitorApp(tk.Tk):
             alert_sent[parameter] = True  # Set the flag to True once an email is sent
 
     # Function to send email alert
-    def send_email_alert(self, parameter, value):
+    def send_email_alert(self, parameter, value, attachment_filename=None):
         em = EmailMessage()
         em['From'] = email_sender
         em['To'] = email_receiver
         em['Subject'] = f"{subject} - {parameter} Exceeded"
         em.set_content(f"Alert!!\nCurrent {parameter} usage: {value}\n\nSuggested Action: {self.suggest_action(parameter)}")
 
+        if attachment_filename:
+            # Attach the running apps text file
+            with open(attachment_filename, 'rb') as file:
+                em.add_attachment(file.read(), maintype='application', subtype='octet-stream', filename=attachment_filename)
+
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
             smtp.login(email_sender, email_pass)
             smtp.sendmail(email_sender, email_receiver, em.as_string())
-
 
     # Function to suggest action based on the parameter that exceeded the threshold
     def suggest_action(self, parameter):
@@ -220,7 +230,8 @@ class SystemMonitorApp(tk.Tk):
     def suggest_process_actions(self, high_cpu_processes):
         actions = []
         for process in high_cpu_processes:
-            actions.append(f"High CPU Usage: {process['name']} (PID: {process['pid']}) - CPU Percent: {process['cpu_percent']:.2f}%")
+            actions.append(
+                f"High CPU Usage: {process['name']} (PID: {process['pid']}) - CPU Percent: {process['cpu_percent']:.2f}%")
         return actions
 
 
