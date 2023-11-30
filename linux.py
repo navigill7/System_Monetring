@@ -9,6 +9,8 @@ import ssl
 import smtplib
 import threading
 
+matplotlib.use('Agg') 
+
 # Email configuration
 email_sender = "nnavigill784@gmail.com"
 email_pass = "acqk xqae vksj glqs"
