@@ -1,0 +1,1 @@
+It is about the real time system monetring project which i had developed to track the real time usage information about the CPU , NETWORK , RAM and  HARD DISK . <br> Basically it operates on simple GUI and Further there are many modifiaction that can be added to it in future to make it realstic
